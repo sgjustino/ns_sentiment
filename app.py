@@ -5,7 +5,6 @@ import plotly.graph_objs as go
 import dash
 from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output
-from interpretation import generate_topic_frequency_html, generate_sentiment_analysis_html, generate_topic_data_table
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -34,10 +33,6 @@ This app contains the following main components:
   data page, including a dropdown for selecting the topic of interest and a 
   range slider for selecting the range of years.
 
-* Interpretation Page: This section defines the layout and components for the 
-  interpretation page, including the generation of the 3 htmls from 
-  interpretation.py and the example gif.
-
 * Callbacks: This section contains the callbacks that update the visualizations 
   and data tables based on user interactions with the dashboard components.
 '''
@@ -50,7 +45,7 @@ This app contains the following main components:
 
 # Load Data, remove error data and convert date correctly
 # Build the path to the file
-file_path = os.path.join(os.getcwd(), 'data', 'uniuk_sentiment_data.csv')
+file_path = os.path.join(os.getcwd(), 'data', 'ns_sentiment_data.csv')
 
 # Read the CSV file into a DataFrame
 sentiment_data = pd.read_csv(file_path)
@@ -62,24 +57,13 @@ sentiment_data = sentiment_data[sentiment_data['Topic_Label'].notna()]
 sentiment_data['created_utc'] = pd.to_datetime(sentiment_data['created_utc'])
 
 '''
-(1) Update Topic and Topic_Label for rows with Topic 99 to Topic 75 to prevent range break for range slider
-(2) Merge Topic 1 to Outliers as Topic 1 (Thank, Thanks, Comment, Post) is not useful
-(3) Decrement all Topic and Topic_Label values by 1 (with the removal of Topic 1)
-
+(1) Update Topic and Topic_Label for rows with Topic 999 to Topic 151 to prevent range break for range slider
 Note: this step was interatively taken during the data sense-making
 '''
 
-# Update Topic 99 to 75
-sentiment_data.loc[sentiment_data['Topic'] == 99, 'Topic'] = 75
-
-# Update Topic 1 to Outliers
-sentiment_data.loc[sentiment_data['Topic'] == 1, 'Topic'] = 75
-sentiment_data.loc[sentiment_data['Topic'] == 75, 'Topic_Label'] = 'Topic 75: Outliers'
-
-# Shift all topics down by 1
-sentiment_data['Topic'] -= 1
-sentiment_data['Topic_Label'] = sentiment_data['Topic_Label'].apply(
-    lambda x: f"Topic {int(x.split(':')[0].split(' ')[1]) - 1}:{x.split(':')[1]}")
+# Update Topic 999 to 151
+sentiment_data.loc[sentiment_data['Topic'] == 999, 'Topic'] = 151
+sentiment_data.loc[sentiment_data['Topic'] == 151, 'Topic_Label'] = 'Topic 151: Outliers'
 
 '''
 Process Topics for dropdown list usage with Topic Number ordering
@@ -126,9 +110,9 @@ app.layout = html.Div([
         children=[
             html.Div(
                 children=[
-                    html.H2('How do the perspectives of UK university students, as expressed on Reddit, evolve over time?'),
+                    html.H2('How do the perspectives of National Servicemen, as expressed on Reddit, evolve over time?'),
                     html.P(
-                        'Examining key themes and sentiment trends from r/UniUK posts (2016-2023) to understand the changing perspectives and emotional dynamics of UK university students.',
+                        'Examining key themes and sentiment trends from r/NationalServiceSG posts (2018-2023) to understand the changing perspectives and emotional dynamics of NSFs.',
                         style={'fontSize': '14px', 'color': '#efefef'}
                     ),
                 ]
@@ -173,13 +157,6 @@ app.layout = html.Div([
                             className="custom-tab",
                             selected_className="custom-tab--selected",
                         ),
-                        dcc.Tab(
-                            id="Interpretation-tab",
-                            label="Interpretation",
-                            value="tab4",
-                            className="custom-tab",
-                            selected_className="custom-tab--selected",
-                        ),
                     ],
                 )
             ]
@@ -205,21 +182,19 @@ background_page = html.Div([
     html.H2("Background", className="title"),    
     html.Hr(),
     dcc.Markdown('''
-    Traditional research studies, often relying on methodologies such as surveys, interviews, or focus groups, are typically constrained by the scale of recruitment and tend to capture student perspectives in more structured, formal environments (e.g. Briggs, Clark & Hall, 2012; Reddy, Menon & Thattil, 2018).
-    In contrast, social media platforms are rich with spontaneous, unfiltered discussions about university life, offering a wider and more authentic range of student viewpoints.
-    Analyzing these social media conversations can reveal subtle and candid insights into the university experience - insights that students might be reluctant to share in the more controlled settings of traditional research methods.
-    Besides that, this approach provides access to a larger volume of data points, capturing a diverse array of student voices and experiences.
-    Recognizing the rich insights that social media conversations offer, we thus turn our attention to the research question:
+    National Service (NS) is a cornerstone of Singapore's social and defense infrastructure. However, public attitudes towards NS are intricate and continuously evolving. Traditional research methodologies, such as surveys and focus groups, though valuable, often grapple with limitations like delayed updates and the potential lack of transparency from participants. 
+    Conversely, social media platforms serve as a rich repository of unsolicited, candid discussions on NS, capturing a broader spectrum of public sentiment in real-time. By analyzing these discussions, we can uncover nuanced perspectives on NS, including issues and positive aspects that may not surface in formal research settings. 
+    Recognizing the substantial insights that social media conversations offer, we thus direct our focus to the research question:
     '''),
     html.Hr(),
     # Explanation on how we will address the RQ
-    html.H2("How do the perspectives of UK university students, as expressed on Reddit, evolve over time?", className="title"), 
+    html.H2("How do the perspectives of National Servicemen, as expressed on Reddit, evolve over time?", className="title"), 
     html.Hr(),
     dcc.Markdown('''
-    To address this, we examined the social media data from the subreddit r/UniUK, a hub for candid UK university student discussions. 
+    To address this question, we examined social media data from the subreddit r/NationalServiceSG, a hub for candid NS discussions. 
     Our analysis of the numerous posts and comments within this community has led to the identification of key themes and the sentiment trends associated with them over time. 
-    Users can navigate the interactive dashboard to explore specific areas of interest, thereby gaining a nuanced understanding of how the sentiments of UK university students on Reddit have evolve over time. 
-    This tool not only aids in answering our research question but also provides a foundation for further research and informed decision-making within the realm of higher education.
+    Users can navigate the interactive dashboard to explore specific areas of interest, thereby gaining a nuanced understanding of how the sentiments of NSFs on Reddit have evolved over time. 
+    This tool not only aids in answering our research question but also provides a foundation for further research and informed decision-making within the realm of National Service.
     '''),
     html.Hr(),
 
@@ -227,103 +202,30 @@ background_page = html.Div([
     html.H2("Navigating the Dashboard", className="title"),
     html.Hr(),
     dcc.Markdown('''
-    The dashboard is built using Dash (Plotly) with the following components:
+    The dashboard, constructed using Dash (Plotly), comprises the following components:
     '''),
-    html.Li("Background Page: Introduces the study motivation and research question, guides users on exploring the dashboard findings and provide additional details like data source, preprocessing steps and references."),
+    html.Li("Background Page: Introduces the study motivation and research question, guides users on exploring the dashboard findings and provide additional details like data source and preprocessing steps."),
     html.Li("Topic Frequency Page: Allows users to view the frequency of selected topics over time, either as absolute counts or normalized percentages, to identify popular topics and trends over time."),
     html.Li("Sentiment Analysis Page: Enables users to analyze sentiment trends for a specific topic over time, using absolute counts or normalized percentages views, to understand the emotional tone of discussions."),
     html.Li("Topic Data Page: Provides a table view of the individual posts for a selected topic and year range, with sentiment indicated by cell color, allowing users to explore specific discussions."),
-    html.Li("Interpretation Page: Demonstrates how to use the dashboard to examine the research question through an example analysis of a specific topic, showcasing insights and conclusions."),
-    html.Li(html.A("Find out more at the github repository", href="https://github.com/sgjustino/UniUK", target="_blank")),
+    html.Li(html.A("Find out more at the github repository", href="https://github.com/sgjustino/ns_sentiment", target="_blank")),
     html.Hr(),
 
-    # Data Source and Pre-processing steps taken
+    # Data Source and Modeling
     html.H2("Data Source and Preprocessing", className="title"),
     html.Hr(),
     dcc.Markdown('''
-    The data, spanning from February 2016 (the inception of Subreddit r/UniUK) to December 2023, was obtained from academic torrents hosted online and collected by an open-source project called Pushshift. 
-    To prepare the data for analysis and answer the research question, several pre-processing steps and modeling were undertaken. 
-    First, the data was cleaned using custom stopwords and the NLTK library to remove irrelevant information and improve the quality of the dataset. 
-    Next, sentiment analysis was performed using VaderSentiment to determine the polarity (positive, neutral, and negative) of each post.
-    Finally, topic modeling was conducted using BerTopic to identify and categorize the main themes within the data.
-    '''),
-    dcc.Markdown('''
-    To focus on the visualisation aspects, the detailed data modeling steps are not covered in this project repository. 
-    However, the modeling process are shared in the accompanying Kaggle notebook, providing a reproducible account of the data analysis.
-    '''),
-    html.Li(html.A("Link to Data Source", href="https://academictorrents.com/details/56aa49f9653ba545f48df2e33679f014d2829c10", target="_blank")),
-    html.Li(html.A("Link to Modeling Notebook", href="https://www.kaggle.com/code/sgjustino/uniuk-topic-modeling-with-bertopic?scriptVersionId=168342984", target="_blank")),
-    html.Hr(),
+    The data, spanning from November 2018 (the inception of Subreddit r/NationalServiceSG) to December 2023, was obtained from academic torrents hosted online and collected by an open-source project called Pushshift. 
 
-    # Meta-data or Codebook
-    html.H2("Meta-Data for Processed Data", className="title"),
-    html.Hr(),
-    # Data Table for the Processed data used in Visualisation
-    html.Div([
-        dash_table.DataTable(
-            data=sentiment_data.head().to_dict('records'),
-            columns=[{"name": i, "id": i} for i in sentiment_data.columns],
-            style_table={'overflowX': 'auto'},
-            style_cell={
-                'backgroundColor': '#26282A',
-                'color': 'white',
-                'fontWeight': 'bold',
-                'textAlign': 'left',
-                'fontFamily': 'Lato, sans-serif',
-                'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-                'overflow': 'hidden',
-                'textOverflow': 'ellipsis',
-            },
-            style_header={
-                'backgroundColor': 'black',
-                'color': 'white',
-                'fontWeight': 'bold',
-                'textAlign': 'left',
-                'fontFamily': 'Lato, sans-serif',
-            }
-        ),
+    To prepare the data for analysis and answer the research question, several preprocessing steps and modeling were undertaken:
 
-        # Meta-data explanation
-        html.Ul([
-            html.Li("body: The text content within a post. It encompasses both initial submissions (which start discussion threads) and subsequent comments. By analyzing these elements collectively, we treat them as a unified set of social media posts for examination."),
-            html.Li("created_utc: The timestamp of when the post was created."),
-            html.Li("sentiment: The sentiment of the post as determined by VaderSentiment (positive, neutral, or negative)."),
-            html.Li("processed_text: The processed content of the post using custom stopwords and NLTK library."),
-            html.Li("Topic: The topic number that the post belongs to as determined by BerTopic. Topic 74 refers to the outliers not classified into any specific topic."),
-            html.Li("Topic_Label: The descriptive label assigned to each topic, derived from the four most representative words identified through a class-based Term Frequency-Inverse Document Frequency analysis of the topic's content (Grootendorst, 2022)."),
-            dcc.Markdown('''
-            Note: The naming conventions for Topic and Topic_Label adhere to those established by BERTopic, utilizing capitalization for consistency and to facilitate future interactions with the library.
-            ''')
-        ]),
-    ]),
-    html.Hr(),
+    1. **Data Cleaning**: Utilizing custom stopwords, the NLTK library, and techniques like lemmatization and stemming, irrelevant information was removed and data was processed to enhance the dataset's quality for subsequent steps.
+    2. **Topic Modeling**: BerTopic was used for topic modeling, and GISTEmbed, a pre-trained transformer model available on Hugging Face, was used as the embedding model to identify and categorize the main themes within the data.
+    3. **Sentiment Analysis**: Sentiment analysis was performed using the Twitter-roBERTa-base model, a pre-trained model available on Hugging Face. This model is fine-tuned for sentiment analysis with the TweetEval benchmark, providing polarity (positive, neutral, and negative) for each post.
+    4. **Theme Fine-tuning**: The identified themes were fine-tuned by generating labels from the BERTopic cluster topics. Highly relevant posts for each topic were passed to the text generation model to create new keywords and a more representative topic label.
 
-    # Libraries, Inspirations and Tools used
-    html.H2("Built With", className="title"),
-    html.Hr(),
-    html.Ul([
-        html.Li(html.A("Pre-processing with NLTK", href="https://github.com/nltk/nltk", target="_blank")),
-        html.Li(html.A("Sentiment classification with VaderSentiment", href="https://github.com/cjhutto/vaderSentiment", target="_blank")),
-        html.Li(html.A("Topic Modeling with BERTopic", href="https://github.com/MaartenGr/BERTopic", target="_blank")),
-        html.Li(html.A("Dashboard Development with Dash (Plotly)", href="https://github.com/plotly/dash", target="_blank")),
-        html.Li(html.A("Inspiration for ranger sliders from Dash Opioid Epidemic Demo", href="https://github.com/plotly/dash-opioid-epidemic-demo", target="_blank")),
-        html.Li(html.A("Inspiration for tabs from Dash Manufacture SPC Dashboard", href="https://github.com/dkrizman/dash-manufacture-spc-dashboard", target="_blank")),
-        html.Li("ChatGPT4 and Claude 3 Opus were utilised for code development and bug fixing.")
-    ]),
-    html.Hr(),
-
-    # References
-    html.H2("References", className="title"),
-    html.Hr(),
-    html.Ul([
-        html.Li("Briggs, A. R., Clark, J., & Hall, I. (2012). Building bridges: understanding student transition to university. Quality in higher education, 18(1), 3-21."),
-        html.Li("Grootendorst, M. (2022). BERTopic: Neural topic modeling with a class-based TF-IDF procedure. arXiv preprint arXiv:2203.05794."),
-        html.Li("Hutto, C.J. & Gilbert, E.E. (2014). VADER: A Parsimonious Rule-based Model for Sentiment Analysis of Social Media Text. Eighth International Conference on Weblogs and Social Media (ICWSM-14). Ann Arbor, MI, June 2014."),
-        html.Li("Baumgartner, J., Zannettou, S., Keegan, B., Squire, M., & Blackburn, J. (2020, May). The pushshift reddit dataset. In Proceedings of the international AAAI conference on web and social media (Vol. 14, pp. 830-839)."),
-        html.Li("Reddy, K. J., Menon, K. R., & Thattil, A. (2018). Academic stress and its sources among university students. Biomedical and pharmacology journal, 11(1), 531-537."),
-        html.Li("Solatorio, A. V. (2024). GISTEmbed: Guided In-sample Selection of Training Negatives for Text Embedding Fine-tuning. arXiv preprint arXiv:2402.16829.")
-    ]),
-    html.Hr()
+    These steps collectively ensure a robust and detailed analysis of the evolving perspectives of National Servicemen on Reddit, facilitating deeper insights into their experiences and sentiments.
+    ''')
 ])
 
 
@@ -431,10 +333,10 @@ topic_data_page = html.Div([
     # Page Year Slider
     dcc.RangeSlider(
         id='year-range-slider',
-        min=2016,
+        min=2018,
         max=2023,
-        value=[2016, 2023],
-        marks={str(year): str(year) for year in range(2016, 2024)},
+        value=[2018, 2023],
+        marks={str(year): str(year) for year in range(2018, 2024)},
         step=1,
         className='year-slider'
     ),
@@ -456,109 +358,6 @@ topic_data_page = html.Div([
 ])
 
 
-
-#################
-# Interpretation Page
-#################
-
-interpretation_page = html.Div([
-    html.H2("Interpretation, Limitations and Future Direction", className="title"),        
-    html.Hr(),
-    # Sample from Topic Frequency Visualisation
-    html.Div([
-        dcc.Graph(figure=generate_topic_frequency_html(sentiment_data, topic_max)),
-        html.Hr(),
-    # Explanation 1
-        dcc.Markdown('''
-    The topic frequency graph provides an overview of the most prevalent themes discussed by UK university students on Reddit r/UniUK. 
-    Notably, while absolute count shows an increasing trend for all topics as the subreddit grows in popularity (see Topic Frequency page), normalizing the data allows us to identify the relative prominence of each topic over time. 
-    Among the top topics, we find a mix of academic concerns (e.g., accommodation, university applications), social aspects (e.g., making friends, societies), and personal well-being (e.g., mental health, finance).
-    First, the prominence of topics such as job, university choice and application, accommodation and finance highlights the practical challenges that students face in their university journey.
-    Likely, students view such social media platforms as an avenue of seeking help and advice from other UK university students who have experienced similar concerns.
-    These discussions not only provide valuable peer-to-peer support but also offer insights into the common struggles and decision-making processes of students.
-    '''),
-    dcc.Markdown('''
-    Interestingly, discussions related to mental health, general health and disabilities (Topic 8) also consistently rank among the most frequently discussed issues. 
-    This observation aligns with the growing concern of student mental health in higher education (Gagné et al., 2021). 
-    To further understand how these data can help us comprehend the experiences and needs of UK university students, we will delve deeper into the mental health topic as a specific area of interest in the subsequent analysis.
-    ''')
-    ,]),
-    html.Hr(),
-    # Sample from Sentiment Analysis Visualisation
-    html.Div([
-        dcc.Graph(figure=generate_sentiment_analysis_html(sentiment_data)),
-        html.Hr(),
-    # Explanation 2
-        dcc.Markdown('''
-        Zooming in on the sentiment analysis graph for Topic 8 (mental health, general health, and disability), we observe an interesting trend. 
-        While the absolute number of posts related to this topic is increasing (see Sentiment Analysis page), the proportion of positive, neutral, and negative sentiments remains relatively stable over time. 
-        Notably, positive posts consistently outnumber negative ones by a ratio of nearly 2:1.
-        This finding suggests that while mental health concerns are indeed prevalent among UK university students, as corroborated by existing research (Gagné et al., 2021), the discourse on Reddit appears to have a more supportive and encouraging tone. 
-        The higher proportion of positive posts could indicate that students are finding solace, advice, and a sense of community through these online discussions.
-    '''),
-    ]),
-    html.Hr(),
-    # Sample from Topic Data Table
-    html.Div([
-        html.P("Topic Data - Topic 8: Mental, Health, Adhd, Gp", className="title-center"), 
-        html.Div([
-            generate_topic_data_table(sentiment_data)
-        ], style={'height': '600px', 'overflow': 'auto'}),
-        html.Hr(),
-    # Explanation 3
-        dcc.Markdown('''
-        Looking at the data table, a closer examination of the content within Topic 8 reveals that students are increasingly turning to the r/UniUK forum to share their mental health struggles, seek advice, and offer support to their peers (page 3 of Topic 8 shown here; see Topic Data page for more). 
-        The posts highlight the various stressors that students face, such as academic pressure, social isolation, and financial worries. 
-        However, the responses to these posts often contain words of encouragement, practical tips, and reminders to prioritize self-care and seek professional help when needed.
-        This content analysis reinforces the notion that online social media platforms like Reddit are emerging as important channels for students to connect, share their experiences, and find support outside of the traditional university mental health support systems. 
-        As Winstone et al. (2021) note, youths are increasingly relying on social media for social connectedness in the face of well-being challenges.
-        The analysis of social media discourse on r/UniUK thus provides insights into how these platforms can complement traditional mental health support systems in better understanding and supporting UK university students' well-being needs.
-        Notably, this dashboard is an exploratory tool to examine various topics through topic frequencies and sentiment trends, offering a nuanced understanding of the authentic student experience. 
-        Future research could extend this tool to investigate integrating social media insights into student policies and intervention plans to better support university life.
-    ''')
-    ]),
-    html.Hr(),
-    
-    # Limitations and Future Direction
-    html.P("Limitations and Future Direction",className="title"),
-    html.Hr(),
-    dcc.Markdown('''
-    This study employed pre-trained transformer-based models with BerTopic for topic classification, which may have limitations in capturing complex nuances between topics (Souza & Filho, 2022). 
-    For example, Topic 9 - Math, Physic, Level, Alevel - may actually belong to 2 separate categories of (1) type of subjects and (2) pre-university education.
-    To enhance the accuracy of topic classification, future research could consider pre-training models with domain-specific data, such as trained twitter datasets relating to students, to better capture the intricacies of these social media data (Guo et al., 2022). 
-    Similarly, while lexicon-based and rule-based techniques like VADER are useful for sentiment analysis without training data, they may struggle with sentences containing sarcasm or irony, which fall outside of the predefined rules (Al-Natour & Turetken, 2020; Samaras, García-Barriocanal & Sicilia, 2023). 
-    To address this limitation, future studies could explore fine-tuning models using Reddit-specific training data to improve sentiment classification accuracy.
-    '''),
-    dcc.Markdown('''
-    In addition to improving classification accuracy, topic representation could be enhanced using Large Language Models (LLMs) to re-examine the identified samples within each topic and generate more representative labels (Grootendorst, 2023). 
-    For instance, Topic 2 in the current study, which classifies different cities or university names like City, University, Manchester, and Leeds, could be more accurately labeled as "City or University Choices" using LLMs. 
-    This approach would provide a more comprehensive understanding of the overarching themes within each topic.
-    Besides that, LLMs also opens up the possibilities in the exploration and interpretation of the data with the integration of AI-powered data visualizations. 
-    Leveraging LLMs like the ChatGPT API, researchers could create open-ended, prompt-based visualizations that are generated on-the-fly based on user prompts (Biswas, 2023). 
-    This approach would enable users to ask more targeted, exploratory questions, generate custom visualisations and uncover novel insights tailored to their specific interests.
-    '''),     
-    # Example of AI-powered Visualisation  
-    html.Figure([
-        html.Img(src='/assets/future_direction.gif', style={'width': '70%', 'height': '70%'}),
-        html.Figcaption("Example of AI-powered visualisation from Biswas (2023).")
-    ]),
-    html.Hr(),
-    
-    # References
-    html.P("References", className="title"),
-    html.Hr(),    
-    html.Li("Al-Natour, S., & Turetken, O. (2020). A comparative assessment of sentiment analysis and star ratings for consumer reviews. International Journal of Information Management, 54, 102132.", className="reference"),
-    html.Li("Biswas, A. (2023, October 17). AI-powered data visualizations: Introducing an app to generate charts using only a single prompt and OpenAI large language models. Databutton. https://medium.com/databutton/ai-powered-data-visualization-134e89d82d99", className="reference"),
-    html.Li("Gagné, T., Schoon, I., McMunn, A., & Sacker, A. (2021). Mental distress among young adults in Great Britain: long-term trends and early changes during the COVID-19 pandemic. Social Psychiatry and Psychiatric Epidemiology, 1-12.", className="reference"),
-    html.Li("Grootendorst, M. (2023, August 22). Topic modeling with Llama 2: Create easily interpretable topics with Large Language Models. Towards Data Science. https://towardsdatascience.com/topic-modeling-with-llama-2-85177d01e174", className="reference"),
-    html.Li("Guo, Y., Ge, Y., Yang, Y. C., Al-Garadi, M. A., & Sarker, A. (2022). Comparison of pretraining models and strategies for health-related social media text classification. In Healthcare (Vol. 10, No. 8, p. 1478). MDPI.", className="reference"),
-    html.Li("Samaras, L., García-Barriocanal, E., & Sicilia, M. A. (2023). Sentiment analysis of COVID-19 cases in Greece using Twitter data. Expert Systems with Applications, 230, 120577.", className="reference"),
-    html.Li("Souza, F. D., & Filho, J. B. D. O. E. S. (2022). BERT for sentiment analysis: pre-trained and fine-tuned alternatives. In International Conference on Computational Processing of the Portuguese Language (pp. 209-218). Cham: Springer International Publishing.", className="reference"),
-    html.Li("Winstone, L., Mars, B., Haworth, C. M., & Kidger, J. (2021). Social media use and social connectedness among adolescents in the United Kingdom: a qualitative exploration of displacement and stimulation. BMC public health, 21, 1-15.", className="reference")
-])
-
-
-
 #################
 # Callbacks
 #################
@@ -575,8 +374,6 @@ def display_page(tab):
         return sentiment_analysis_page
     elif tab == 'tab3':
         return topic_data_page
-    elif tab == 'tab4':
-        return interpretation_page
     else:
         return background_page
 
