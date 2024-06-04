@@ -112,10 +112,10 @@ Alternatively, you can run the application using the Docker image available on D
 
 - [Pre-processing with NLTK](https://github.com/nltk/nltk)
 - [Topic Modeling with BERTopic](https://github.com/MaartenGr/BERTopic)
-- [Sentiment Classification with VADER](https://github.com/cjhutto/vaderSentiment)
+- [Embedding with GISTEmbed](https://huggingface.co/avsolatorio/GIST-large-Embedding-v0)
+- [Sentiment Classification with RoBERTa model](https://huggingface.co/cardiffnlp/twitter-roberta-base-sentiment-latest)
+- [Label Fine-tuning with Llama 3](https://github.com/meta-llama/llama3)
 - [Dashboard Development with Dash (Plotly)](https://github.com/plotly/dash)
-- [Inspiration for range sliders from Dash Opioid Epidemic Demo](https://github.com/plotly/dash-opioid-epidemic-demo)
-- [Inspiration for tabs from Dash Manufacture SPC Dashboard](https://github.com/dkrizman/dash-manufacture-spc-dashboard)
 - ChatGPT4 and Claude 3 Opus were utilised for code development and bug fixing.
 
 ## License

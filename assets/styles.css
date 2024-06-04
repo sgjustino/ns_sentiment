@@ -145,6 +145,11 @@ hr {
     box-shadow: 0 0 0 5px #6bc7b6;
 }
 
+.rc-slider-mark-text {
+    font-size: 14px;
+    color: #e1ebea;
+}
+
 /* Absolute Frequency/Normalized Frequency Tabs
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 .frequency-tabs {

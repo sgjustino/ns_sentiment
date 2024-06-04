@@ -217,14 +217,13 @@ background_page = html.Div([
     dcc.Markdown('''
     The data, spanning from November 2018 (the inception of Subreddit r/NationalServiceSG) to December 2023, was obtained from academic torrents hosted online and collected by an open-source project called Pushshift. 
 
-    To prepare the data for analysis and answer the research question, several preprocessing steps and modeling were undertaken:
+    Several preprocessing steps and modeling were undertaken:
 
-    1. **Data Cleaning**: Utilizing custom stopwords, the NLTK library, and techniques like lemmatization and stemming, irrelevant information was removed and data was processed to enhance the dataset's quality for subsequent steps.
-    2. **Topic Modeling**: BerTopic was used for topic modeling, and GISTEmbed, a pre-trained transformer model available on Hugging Face, was used as the embedding model to identify and categorize the main themes within the data.
-    3. **Sentiment Analysis**: Sentiment analysis was performed using the Twitter-roBERTa-base model, a pre-trained model available on Hugging Face. This model is fine-tuned for sentiment analysis with the TweetEval benchmark, providing polarity (positive, neutral, and negative) for each post.
-    4. **Theme Fine-tuning**: The identified themes were fine-tuned by generating labels from the BERTopic cluster topics. Highly relevant posts for each topic were passed to the text generation model to create new keywords and a more representative topic label.
+    1. Data Cleaning: Utilizing custom stopwords, the NLTK library, and techniques like lemmatization and stemming, irrelevant information was removed and data was processed to enhance the dataset's quality for subsequent steps.
+    2. Topic Modeling: BerTopic was used for topic modeling, and GISTEmbed, a pre-trained transformer model available on Hugging Face, was used as the embedding model to identify and categorize the main themes within the data.
+    3. Sentiment Analysis: Sentiment analysis was performed using the Twitter-roBERTa-base model, a pre-trained model available on Hugging Face. This model is fine-tuned for sentiment analysis with the TweetEval benchmark, providing polarity (positive, neutral, and negative) for each post.
+    4. Theme Fine-tuning: The identified themes were fine-tuned by generating labels from the BERTopic cluster topics. Highly relevant posts for each topic were passed to the text generation model to create new keywords and a more representative topic label.
 
-    These steps collectively ensure a robust and detailed analysis of the evolving perspectives of National Servicemen on Reddit, facilitating deeper insights into their experiences and sentiments.
     ''')
 ])
 
@@ -239,9 +238,11 @@ topic_frequency_page = html.Div([
     html.H1("Tracking Topic Frequencies over Time", className="title"),
     html.Hr(),
     html.P([
-    "(1) Select Range of Topics.", 
+    "1: Select Range of Topics.",
     html.Br(),
-    "(2) Select Type of Frequency: Absolute Counts or Normalized Percentages (% of frequency for the topic out of all selected topics)."
+    "2: Select Range of Years.",
+    html.Br(),
+    "3: Select Type of Frequency: Absolute Counts or Normalized Percentages (% of frequency for the topic out of all selected topics)."
     ], className="instructions"),
     # Page Topic Slider
     dcc.RangeSlider(
@@ -251,6 +252,15 @@ topic_frequency_page = html.Div([
         value=[1, 10],
         marks={**{1: '1'}, **{i: str(i) for i in range(10, topic_max, 10)}, **{topic_max: str(topic_max)}},
         step=None
+    ),
+    # Page Year Slider
+    dcc.RangeSlider(
+        id='topic-frequency-year-slider',
+        min=2018,
+        max=2023,
+        value=[2018, 2023],
+        marks={str(year): str(year) for year in range(2018, 2024)},
+        step=1
     ),
     # Page Frequency Tabs
     dcc.Tabs(
@@ -279,17 +289,29 @@ sentiment_analysis_page = html.Div([
     html.H1(id='sentiment-analysis-title', className="title"),
     html.Hr(),
     html.P([
-    "(1) Select Topic of Interest.", 
+    "1: Select Topic of Interest.", 
     html.Br(),
-    "(2) Select Type of Frequency: Absolute Counts or Normalized Percentages (% of frequency for the topic out of all selected topics)."
+    "2: Select Range of Years.",
+    html.Br(),
+    "3: Select Type of Frequency: Absolute Counts or Normalized Percentages (% of frequency for the topic out of all selected topics)."
     ], className="instructions"),
     # Page Topic Dropdown List
     dcc.Dropdown(
         id='topic-dropdown',
         options=dropdown_options,
         value=topic_label_df['Topic_Label'].iloc[0],
+        style={'marginBottom': '20px'},
         className='Select',
         clearable=False
+    ),
+    # Page Year Slider
+    dcc.RangeSlider(
+        id='sentiment-analysis-year-slider',
+        min=2018,
+        max=2023,
+        value=[2018, 2023],
+        marks={str(year): str(year) for year in range(2018, 2024)},
+        step=1
     ),
     # Page Frequency Tabs
     dcc.Tabs(
@@ -317,9 +339,9 @@ topic_data_page = html.Div([
     html.H1(id='topic-data-title', className="title"),
     html.Hr(),
     html.P([
-    "(1) Select Topic of Interest.", 
+    "1: Select Topic of Interest.", 
     html.Br(),
-    "(2) Select Range of Years."
+    "2: Select Range of Years."
     ], className="instructions"),
     # Page Topic Dropdown List
     dcc.Dropdown(
@@ -381,7 +403,8 @@ def display_page(tab):
 @app.callback(
     Output('topic-frequency-graph', 'figure'),
     [Input('topic-range-slider', 'value'),
-     Input('frequency-tabs', 'value')]
+     Input('frequency-tabs', 'value'),
+     Input('topic-frequency-year-slider', 'value')]
 )
 
 
@@ -390,31 +413,36 @@ def display_page(tab):
 # Topic Frequency Visualisation
 #################
 
-def update_topic_frequency_graph(selected_range, frequency_type):
+def update_topic_frequency_graph(selected_range, frequency_type, selected_years):
     """
-    Update the topic frequency graph based on the selected topic range and frequency type.
+    Update the topic frequency graph based on the selected topic range, frequency type, and selected years.
 
     Args:
         selected_range (list): A list containing the start and end values of the selected topic range.
         frequency_type (str): The type of frequency to display ('absolute' or 'normalized').
+        selected_years (list): A list containing the start and end years of the selected range.
 
     Returns:
         go.Figure: The updated topic frequency graph figure.
     """
 
-    # Filter data based on selected topic range
-    filtered_data = sentiment_data[sentiment_data['Topic'].isin(range(selected_range[0], selected_range[1] + 1))]
+    # Filter data based on selected topic range and years
+    filtered_data_years = sentiment_data[
+        (sentiment_data['Topic'].isin(range(selected_range[0], selected_range[1] + 1))) &
+        (sentiment_data['created_utc'].dt.year >= selected_years[0]) &
+        (sentiment_data['created_utc'].dt.year <= selected_years[1])
+    ]
 
     # Ensure the index is a DatetimeIndex before converting to period
-    if not isinstance(filtered_data.index, pd.DatetimeIndex):
-        filtered_data['created_utc'] = pd.to_datetime(filtered_data['created_utc'])
-        filtered_data.set_index('created_utc', inplace=True)
-        
+    if not isinstance(filtered_data_years.index, pd.DatetimeIndex):
+        filtered_data_years['created_utc'] = pd.to_datetime(filtered_data_years['created_utc'])
+        filtered_data_years.set_index('created_utc', inplace=True)
+
     # Create a 'Quarter' column from the 'created_utc' index
-    filtered_data['Quarter'] = filtered_data.index.to_period('Q')
+    filtered_data_years['Quarter'] = filtered_data_years.index.to_period('Q')
 
     # Aggregate data by Quarter and Topic_Label
-    topic_freq_over_time = filtered_data.groupby(['Quarter', 'Topic_Label']).size().unstack(fill_value=0)
+    topic_freq_over_time = filtered_data_years.groupby(['Quarter', 'Topic_Label']).size().unstack(fill_value=0)
 
     # Normalize frequencies by quarter and multiply by 100 for percentage
     topic_freq_over_time_normalized = topic_freq_over_time.div(topic_freq_over_time.sum(axis=1), axis=0) * 100
@@ -474,7 +502,8 @@ def update_topic_frequency_graph(selected_range, frequency_type):
     [Output('sentiment-analysis-title', 'children'),
      Output('sentiment-analysis-graph', 'figure')],
     [Input('topic-dropdown', 'value'),
-     Input('sentiment-frequency-tabs', 'value')]
+     Input('sentiment-frequency-tabs', 'value'),
+     Input('sentiment-analysis-year-slider', 'value')]
 )
 
 
@@ -483,13 +512,14 @@ def update_topic_frequency_graph(selected_range, frequency_type):
 # Sentiment Analysis Visualisation
 #################
 
-def update_sentiment_analysis_graph(selected_topic_label, frequency_type):
+def update_sentiment_analysis_graph(selected_topic_label, frequency_type, selected_years):
     """
-    Update the sentiment analysis graph based on the selected topic and frequency type.
+    Update the sentiment analysis graph based on the selected topic, frequency type, and selected years.
 
     Args:
         selected_topic_label (str): The selected topic label from the dropdown.
         frequency_type (str): The type of frequency to display ('absolute' or 'normalized').
+        selected_years (list): A list containing the start and end years of the selected range.
 
     Returns:
         tuple: A tuple containing the updated title and figure for the sentiment analysis graph.
@@ -510,9 +540,11 @@ def update_sentiment_analysis_graph(selected_topic_label, frequency_type):
         lambda x: int(x.split(':')[0].replace('Topic ', '').strip())
     )
     
-    # Filter for the selected topic
+    # Filter for the selected topic and years
     filtered_sentiment_counts = sentiment_counts[
-        sentiment_counts['Topic_Label'] == selected_topic_label
+        (sentiment_counts['Topic_Label'] == selected_topic_label) &
+        (sentiment_counts['created_utc'].dt.year >= selected_years[0]) &
+        (sentiment_counts['created_utc'].dt.year <= selected_years[1])
     ].copy()
     
     # Get the actual Topic_Label for the selected topic (for title)
