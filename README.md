@@ -24,6 +24,7 @@ To prepare the data for analysis and answer the research question, several prepr
 * Topic Modeling: BerTopic was used for topic modeling, and GISTEmbed, a pre-trained transformer model available on Hugging Face, was used as the embedding model to identify and categorize the main themes within the data.
 * Sentiment Analysis: Sentiment analysis was performed using the Twitter-roBERTa-base model, a pre-trained model available on Hugging Face. This model is fine-tuned for sentiment analysis with the TweetEval benchmark, providing polarity (positive, neutral, and negative) for each post.
 * Theme Fine-tuning: The identified themes were fine-tuned by generating labels from the BERTopic cluster topics. Highly relevant posts for each topic were passed to the text generation model to create new keywords and a more representative topic label.
+
 These steps collectively ensure a robust and detailed analysis of the evolving perspectives of National Servicemen on Reddit, facilitating deeper insights into their experiences and sentiments.
 
 ## Repository Structure
