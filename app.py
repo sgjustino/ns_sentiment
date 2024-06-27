@@ -182,19 +182,18 @@ background_page = html.Div([
     html.H2("Background", className="title"),    
     html.Hr(),
     dcc.Markdown('''
-    National Service (NS) is a cornerstone of Singapore's social and defense infrastructure. However, public attitudes towards NS are intricate and continuously evolving. Traditional research methodologies, such as surveys and focus groups, though valuable, often grapple with limitations like delayed updates and the potential lack of transparency from participants. 
-    Conversely, social media platforms serve as a rich repository of unsolicited, candid discussions on NS, capturing a broader spectrum of public sentiment in real-time. By analyzing these discussions, we can uncover nuanced perspectives on NS, including issues and positive aspects that may not surface in formal research settings. 
-    Recognizing the substantial insights that social media conversations offer, we thus direct our focus to the research question:
+    National Service (NS) is a cornerstone of Singapore's social and defense framework. To understand public attitudes towards NS, traditional methods like surveys have been invaluable, helping us gain significant insights. However, these approaches often struggle to capture real-time, unfiltered opinions.
+    In contrast, social media platforms, particularly Reddit, have emerged as rich sources of candid, unsolicited discussions about NS. These online exchanges frequently reveal nuanced perspectives and emerging issues that might not surface through conventional channels.
+    Recognizing the wealth of insights available in these online discussions, we aim to explore:
     '''),
     html.Hr(),
     # Explanation on how we will address the RQ
     html.H2("How do the perspectives of National Servicemen, as expressed on Reddit, evolve over time?", className="title"), 
     html.Hr(),
     dcc.Markdown('''
-    To address this question, we examined social media data from the subreddit r/NationalServiceSG, a hub for candid NS discussions. 
-    Our analysis of the numerous posts and comments within this community has led to the identification of key themes and the sentiment trends associated with them over time. 
-    Users can navigate the interactive dashboard to explore specific areas of interest, thereby gaining a nuanced understanding of how the sentiments of NSFs on Reddit have evolved over time. 
-    This tool not only aids in answering our research question but also provides a foundation for further research and informed decision-making within the realm of National Service.
+    To address this, we analyzed data from r/NationalServiceSG, a hub for open NS discussions on Reddit.
+    This dashboard presents key findings from our topic modeling and sentiment analysis, offering a window into the primary NS themes and sentiment trends over time. Users can interact with various components to delve into specific areas of interest, gaining deeper insights into the changing sentiments of NSFs on social media.
+    By leveraging this tool, stakeholders can gain a more comprehensive understanding of NS-related discussions, potentially informing policy decisions and improvements in the NS experience.
     '''),
     html.Hr(),
 
@@ -202,28 +201,36 @@ background_page = html.Div([
     html.H2("Navigating the Dashboard", className="title"),
     html.Hr(),
     dcc.Markdown('''
-    The dashboard, constructed using Dash (Plotly), comprises the following components:
+    The dashboard, built with Dash (Plotly), includes:
     '''),
-    html.Li("Background Page: Introduces the study motivation and research question, guides users on exploring the dashboard findings and provide additional details like data source and preprocessing steps."),
-    html.Li("Topic Frequency Page: Allows users to view the frequency of selected topics over time, either as absolute counts or normalized percentages, to identify popular topics and trends over time."),
-    html.Li("Sentiment Analysis Page: Enables users to analyze sentiment trends for a specific topic over time, using absolute counts or normalized percentages views, to understand the emotional tone of discussions."),
-    html.Li("Topic Data Page: Provides a table view of the individual posts for a selected topic and year range, with sentiment indicated by cell color, allowing users to explore specific discussions."),
-    html.Li(html.A("Find out more at the github repository", href="https://github.com/sgjustino/ns_sentiment", target="_blank")),
+    html.Li("Background Page: Introduces the study, guides dashboard navigation, and provides context on data sources and methods."),
+    html.Li("Topic Frequency Page: Shows topic frequency over time. Allows custom date ranges and topic comparisons."),
+    html.Li("Sentiment Analysis Page: Displays sentiment trends for specific topics over time."),
+    html.Li("Topic Data Page: Table view of posts by topic and date range, with color-coded sentiment."),
+    html.Li(html.A("Github repository", href="https://github.com/sgjustino/ns_sentiment", target="_blank")),
     html.Hr(),
 
     # Data Source and Modeling
     html.H2("Data Source and Preprocessing", className="title"),
     html.Hr(),
     dcc.Markdown('''
-    The data, spanning from November 2018 (the inception of Subreddit r/NationalServiceSG) to December 2023, was obtained from academic torrents hosted online and collected by an open-source project called Pushshift. 
+    ### Data Source
+    Our analysis draws from the r/NationalServiceSG subreddit, covering discussions from November 2018 through December 2023. This data was sourced from academic torrents, collected via the open-source Pushshift project. 
 
-    Several preprocessing steps and modeling were undertaken:
+    ### Methodology
 
-    1. Data Cleaning: Utilizing custom stopwords, the NLTK library, and techniques like lemmatization and stemming, irrelevant information was removed and data was processed to enhance the dataset's quality for subsequent steps.
-    2. Topic Modeling: BerTopic was used for topic modeling, and GISTEmbed, a pre-trained transformer model available on Hugging Face, was used as the embedding model to identify and categorize the main themes within the data.
-    3. Sentiment Analysis: Sentiment analysis was performed using the Twitter-roBERTa-base model, a pre-trained model available on Hugging Face. This model is fine-tuned for sentiment analysis with the TweetEval benchmark, providing polarity (positive, neutral, and negative) for each post.
-    4. Theme Fine-tuning: The identified themes were fine-tuned by generating labels from the BERTopic cluster topics. Highly relevant posts for each topic were passed to the text generation model to create new keywords and a more representative topic label.
+    1. **Data Refinement**
+    - Utilized NLTK library for text pre-processing
+    - Conducted lemmatization and stemming techniques
+    - Applied custom stopword filters to remove irrelevant content iteratively
 
+    2. **Thematic Analysis**
+    - Used BERTopic for topic modeling
+    - Integrated GISTEmbed, a transformer model from Hugging Face, as the embedding framework
+
+    3. **Sentiment Evaluation**
+    - Deployed the Twitter-roBERTa-base model, fine-tuned on the TweetEval benchmark
+    - Classified posts into positive, neutral, and negative sentiments
     ''')
 ])
 
@@ -242,7 +249,7 @@ topic_frequency_page = html.Div([
     html.Br(),
     "2: Select Range of Years.",
     html.Br(),
-    "3: Select Type of Frequency: Absolute Counts or Normalized Percentages (% of frequency for the topic out of all selected topics)."
+    "3: Select Type of Frequency: Absolute Post Count or Relative Post Count"
     ], className="instructions"),
     # Page Topic Slider
     dcc.RangeSlider(
@@ -267,8 +274,8 @@ topic_frequency_page = html.Div([
         id='frequency-tabs',
         value='absolute',
         children=[
-            dcc.Tab(label='Absolute Counts', value='absolute'),
-            dcc.Tab(label='Normalized Percentages', value='normalized')
+            dcc.Tab(label='Absolute Post Count: Number of posts for each topic', value='absolute'),
+            dcc.Tab(label='Relative Post Count: % of posts for each topic across selected topics', value='normalized')
         ]
     ),
     # Page Visualisation
@@ -293,7 +300,7 @@ sentiment_analysis_page = html.Div([
     html.Br(),
     "2: Select Range of Years.",
     html.Br(),
-    "3: Select Type of Frequency: Absolute Counts or Normalized Percentages (% of frequency for the topic out of all selected topics)."
+    "3: Select Type of Frequency: Sentiment Count or Relative Sentiment Count"
     ], className="instructions"),
     # Page Topic Dropdown List
     dcc.Dropdown(
@@ -318,8 +325,8 @@ sentiment_analysis_page = html.Div([
         id='sentiment-frequency-tabs',
         value='absolute',
         children=[
-            dcc.Tab(label='Absolute Counts', value='absolute'),
-            dcc.Tab(label='Normalized Percentages', value='normalized')
+            dcc.Tab(label='Sentiment Counts: Number of posts for each sentiment', value='absolute'),
+            dcc.Tab(label='Relative Sentiment Counts: % of posts for each sentiment', value='normalized')
         ]
     ),
     # Page Visualisation
