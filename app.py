@@ -321,6 +321,15 @@ sentiment_analysis_page = html.Div([
             dcc.Tab(label='Relative Sentiment Counts: % of posts for each sentiment', value='normalized')
         ]
     ),
+    # Topic Table Legend
+    html.Div([
+        html.Div([
+            html.P("Sentiment:", className="topic-table-legend-title"),
+            html.Span("Positive", className="topic-table-legend positive"),
+            html.Span("Neutral", className="topic-table-legend neutral"),
+            html.Span("Negative", className="topic-table-legend negative")
+        ], className="topic-table-legend")
+    ]),
     # Page Visualisation
     html.Div(
         className='graph-container',
@@ -479,22 +488,35 @@ def update_topic_frequency_graph(selected_range, frequency_type, selected_years)
             x=topic_freq_over_time_normalized.index.to_timestamp(),
             y=topic_freq_over_time_normalized[topic_label],
             mode='lines+markers',
-            name=f"{topic_label} (Normalized)",
+            name=topic_label,
             hoverinfo='x+y',
             hovertemplate=f"{topic_label}<br>Frequency: %{{y:.1f}}%<br>Quarter: %{{x}}<extra></extra>",
             visible=frequency_type == 'normalized'
         ))
-    
+
+    # Set y-axis title based on frequency type
+    yaxis_title = "<b>Frequency</b>" if frequency_type == 'absolute' else "<b>Frequency (%)</b>"
+
     # Additional inputs like axis legends
     fig.update_layout(
-        xaxis_title="<b>Time</b>",
-        yaxis_title="<b>Frequency</b>",
-        legend_title="<b>Topic Label</b>",
+        height=700,
+        xaxis=dict(
+            title="<b>Time</b>",
+            automargin=True
+        ),
+        yaxis=dict(
+            title=yaxis_title
+        ),
+        legend=dict(
+            font=dict(size=10),
+            traceorder="normal"
+        ),
         template="plotly_dark",
-        margin=dict(t=30, b=55, l=0, r=0),
     )
 
+
     return fig
+
 
 # Callback for sentiment analysis graph
 @app.callback(
@@ -550,7 +572,7 @@ def update_sentiment_analysis_graph(selected_topic_label, frequency_type, select
     topic_label = filtered_sentiment_counts['Topic_Label'].iloc[0]
     
     # Define colors for each sentiment
-    colors = {'negative': '#FF0000', 'neutral': '#FFFF00', 'positive': '#00FF00'}
+    colors = {'negative': '#FF887E', 'neutral': '#FEE191', 'positive': '#B0DBA4'}
 
     # Plot for Absolute Frequencies
     fig_abs = go.Figure()
@@ -594,7 +616,7 @@ def update_sentiment_analysis_graph(selected_topic_label, frequency_type, select
                 x=filtered_sentiment_counts['created_utc'],
                 y=filtered_sentiment_counts[normalized_column_name],
                 mode='lines+markers',
-                name=f'{sentiment} (Normalized)',
+                name=sentiment,
                 legendgroup=topic_label,
                 line=dict(color=colors[sentiment]),
                 visible=frequency_type == 'normalized'
@@ -607,14 +629,17 @@ def update_sentiment_analysis_graph(selected_topic_label, frequency_type, select
     # Add traces from both absolute and normalized figures
     fig.add_traces(fig_abs.data + fig_norm.data)
     
+    # Set y-axis title based on frequency type
+    yaxis_title = "<b>Frequency</b>" if frequency_type == 'absolute' else "<b>Frequency (%)</b>"
+    
     # Additional inputs like axis legends
     fig.update_layout(
+        height=700,
         xaxis_title='<b>Time</b>',
-        yaxis_title='<b>Frequency</b>',
-        legend_title='<b>Sentiment</b>',
-        legend=dict(y=0.5,font=dict(size=12)),
+        yaxis_title=yaxis_title,
         template="plotly_dark",
-        margin=dict(t=30, b=55, l=0, r=0)
+        margin=dict(t=30, b=55, l=0, r=0),
+        showlegend=False  # This line hides the legend
     )
     
     # 1st output for Title, 2nd for Figure
