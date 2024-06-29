@@ -237,7 +237,7 @@ topic_frequency_page = html.Div([
     html.H1("Tracking Topic Frequencies over Time", className="title"),
     html.Hr(),
     html.P([
-    "1: Select Range of Topics.",
+    "1: Select Range of Topics. Double-click to deselect individual topics. Note: The last topic (135) represents outliers.",
     html.Br(),
     "2: Select Range of Years.",
     html.Br(),
