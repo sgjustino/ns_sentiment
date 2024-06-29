@@ -9,23 +9,30 @@ This repository contains a data visualization dashboard for analyzing and visual
 
 The dashboard is built using Dash (Plotly) with the following components:
 
-* `Background Page`: Introduces the study motivation and research question, guides users on exploring the dashboard findings and provide additional details like data source and preprocessing steps.
-* `Topic Frequency Page`: Allows users to view the frequency of selected topics over time, either as absolute counts or normalized percentages, to identify popular topics and trends over time.
-* `Sentiment Analysis Page`: Enables users to analyze sentiment trends for a specific topic over time, using absolute counts or normalized percentages views, to understand the emotional tone of discussions.
-* `Topic Data Page`: Provides a table view of the individual posts for a selected topic and year range, with sentiment indicated by cell color, allowing users to explore specific discussions.
+* `Background Page`:  Introduces the study, guides dashboard navigation, and provides context on data sources and methods.
+* `Topic Frequency Page`: Shows topic frequency over time. Allows custom date ranges and topic comparisons.
+* `Sentiment Analysis Page`: Displays sentiment trends for specific topics over time.
+* `Topic Data Page`: Table view of posts by topic and date range, with color-coded sentiment.
     
 ## Data Source and Preprocessing
 
-The data, spanning from November 2018 (the inception of Subreddit r/NationalServiceSG) to December 2023, was obtained from academic torrents hosted online and collected by an open-source project called Pushshift.
+### Data Source
+    Our analysis draws from the r/NationalServiceSG subreddit, covering discussions from November 2018 through December 2023. This data was sourced from academic torrents, collected via the open-source Pushshift project. 
 
-To prepare the data for analysis and answer the research question, several preprocessing steps and modeling were undertaken:
+    ### Methodology
 
-* Data Cleaning: Utilizing custom stopwords, the NLTK library, and techniques like lemmatization and stemming, irrelevant information was removed and data was processed to enhance the dataset's quality for subsequent steps.
-* Topic Modeling: BerTopic was used for topic modeling, and GISTEmbed, a pre-trained transformer model available on Hugging Face, was used as the embedding model to identify and categorize the main themes within the data.
-* Sentiment Analysis: Sentiment analysis was performed using the Twitter-roBERTa-base model, a pre-trained model available on Hugging Face. This model is fine-tuned for sentiment analysis with the TweetEval benchmark, providing polarity (positive, neutral, and negative) for each post.
-* Theme Fine-tuning: The identified themes were fine-tuned by generating labels from the BERTopic cluster topics. Highly relevant posts for each topic were passed to the text generation model to create new keywords and a more representative topic label.
+    1. **Data Refinement**
+    - Utilized NLTK library for text pre-processing
+    - Conducted lemmatization and stemming techniques
+    - Applied custom stopword filters to remove irrelevant content iteratively
 
-These steps collectively ensure a robust and detailed analysis of the evolving perspectives of National Servicemen on Reddit, facilitating deeper insights into their experiences and sentiments.
+    2. **Thematic Analysis**
+    - Used BERTopic for topic modeling
+    - Integrated GISTEmbed, a transformer model from Hugging Face, as the embedding framework
+
+    3. **Sentiment Evaluation**
+    - Deployed the Twitter-roBERTa-base model, fine-tuned on the TweetEval benchmark
+    - Classified posts into positive, neutral, and negative sentiments
 
 ## Repository Structure
 
@@ -33,7 +40,7 @@ These steps collectively ensure a robust and detailed analysis of the evolving p
 - `data/ns_sentiment_data.csv`: The dataset used for visualization in the dashboard.
 - `.gitattributes`: The configuration file that specifies which files should be handled by Git Large File Storage (LFS), used for handling of the data file.
 - `app.py`: The main Python script that contains the Dash application code for the visualization dashboard.
-- `dockerfile`: The Dockerfile to build the Docker image for the repository, with the necessary environment and dependencies. [Docker Image Link](https://hub.docker.com/r/razuki/uniuk-app)
+- `dockerfile`: The Dockerfile to build the Docker image for the repository, with the necessary environment and dependencies.
 - `requirements.txt`: The file listing the required Python packages to run the application.
 
 ## App.py Components
@@ -115,7 +122,6 @@ Alternatively, you can run the application using the Docker image available on D
 - [Topic Modeling with BERTopic](https://github.com/MaartenGr/BERTopic)
 - [Embedding with GISTEmbed](https://huggingface.co/avsolatorio/GIST-large-Embedding-v0)
 - [Sentiment Classification with RoBERTa model](https://huggingface.co/cardiffnlp/twitter-roberta-base-sentiment-latest)
-- [Label Fine-tuning with Llama 3](https://github.com/meta-llama/llama3)
 - [Dashboard Development with Dash (Plotly)](https://github.com/plotly/dash)
 - ChatGPT4 and Claude 3 Opus were utilised for code development and bug fixing.
 
