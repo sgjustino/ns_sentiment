@@ -54,7 +54,8 @@ sentiment_data = pd.read_csv(file_path)
 sentiment_data = sentiment_data[sentiment_data['Topic_Label'].notna()]
 
 #convert the 'created_utc' column to datetime format
-sentiment_data['created_utc'] = pd.to_datetime(sentiment_data['created_utc'])
+sentiment_data['created_utc'] = pd.to_datetime(sentiment_data['created_utc'].str.split(' ').str[0], format='%d/%m/%Y')
+
 
 '''
 Process Topics for dropdown list usage with Topic Number ordering
