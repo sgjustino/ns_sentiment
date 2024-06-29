@@ -57,15 +57,6 @@ sentiment_data = sentiment_data[sentiment_data['Topic_Label'].notna()]
 sentiment_data['created_utc'] = pd.to_datetime(sentiment_data['created_utc'])
 
 '''
-(1) Update Topic and Topic_Label for rows with Topic 999 to Topic 151 to prevent range break for range slider
-Note: this step was interatively taken during the data sense-making
-'''
-
-# Update Topic 999 to 151
-sentiment_data.loc[sentiment_data['Topic'] == 999, 'Topic'] = 151
-sentiment_data.loc[sentiment_data['Topic'] == 151, 'Topic_Label'] = 'Topic 151: Outliers'
-
-'''
 Process Topics for dropdown list usage with Topic Number ordering
 '''
 
@@ -249,7 +240,7 @@ topic_frequency_page = html.Div([
     html.Br(),
     "2: Select Range of Years.",
     html.Br(),
-    "3: Select Type of Frequency: Absolute Post Count or Relative Post Count"
+    "3: Select Frequency Type: Absolute Post Count or Relative Post Count"
     ], className="instructions"),
     # Page Topic Slider
     dcc.RangeSlider(
@@ -300,7 +291,7 @@ sentiment_analysis_page = html.Div([
     html.Br(),
     "2: Select Range of Years.",
     html.Br(),
-    "3: Select Type of Frequency: Sentiment Count or Relative Sentiment Count"
+    "3: Select Frequency Type: Sentiment Count or Relative Sentiment Count"
     ], className="instructions"),
     # Page Topic Dropdown List
     dcc.Dropdown(
