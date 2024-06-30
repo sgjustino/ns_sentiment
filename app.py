@@ -373,7 +373,7 @@ topic_data_page = html.Div([
     # Topic Table Legend
     html.Div([
         html.Div([
-            html.P("Content Sentiment:", className="topic-table-legend-title"),
+            html.P("Sentiment:", className="topic-table-legend-title"),
             html.Span("Positive", className="topic-table-legend positive"),
             html.Span("Neutral", className="topic-table-legend neutral"),
             html.Span("Negative", className="topic-table-legend negative")
@@ -472,13 +472,30 @@ def update_topic_frequency_graph(selected_range, frequency_type, selected_years)
     # Initialize figure
     fig = go.Figure()
     
-    # Add traces for absolute and normalized frequencies, with sorting applied to columns
+    def wrap_legend_label(label, max_width=20):
+        words = label.split()
+        lines = []
+        current_line = []
+        current_length = 0
+        for word in words:
+            if current_length + len(word) <= max_width:
+                current_line.append(word)
+                current_length += len(word) + 1  # +1 for space
+            else:
+                lines.append(' '.join(current_line))
+                current_line = [word]
+                current_length = len(word)
+        lines.append(' '.join(current_line))
+        return '<br>'.join(lines)  # Use <br> for HTML line breaks in Plotly
+
     for topic_label in sorted_columns:
+        wrapped_label = wrap_legend_label(topic_label)
+        
         fig.add_trace(go.Scatter(
             x=topic_freq_over_time.index.to_timestamp(),
             y=topic_freq_over_time[topic_label],
             mode='lines+markers',
-            name=topic_label,
+            name=wrapped_label,
             hoverinfo='x+y',
             hovertemplate=f"{topic_label}<br>Frequency: %{{y}}<br>Quarter: %{{x}}<extra></extra>",
             visible=frequency_type == 'absolute'
@@ -488,7 +505,7 @@ def update_topic_frequency_graph(selected_range, frequency_type, selected_years)
             x=topic_freq_over_time_normalized.index.to_timestamp(),
             y=topic_freq_over_time_normalized[topic_label],
             mode='lines+markers',
-            name=topic_label,
+            name=wrapped_label,
             hoverinfo='x+y',
             hovertemplate=f"{topic_label}<br>Frequency: %{{y:.1f}}%<br>Quarter: %{{x}}<extra></extra>",
             visible=frequency_type == 'normalized'
@@ -509,7 +526,9 @@ def update_topic_frequency_graph(selected_range, frequency_type, selected_years)
         ),
         legend=dict(
             font=dict(size=10),
-            traceorder="normal"
+            traceorder="normal",
+            itemwidth=30,  # Decrease item width
+            itemsizing="constant",
         ),
         template="plotly_dark",
     )
