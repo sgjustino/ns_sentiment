@@ -178,9 +178,6 @@ background_page = html.Div([
     # How to navigate the dashboard
     html.H2("Navigating the Dashboard", className="title"),
     html.Hr(),
-    dcc.Markdown('''
-    The dashboard includes:
-    '''),
     html.Li("Background Page: Introduces the study, guides dashboard navigation, and provides context on data sources and methods."),
     html.Li("Topic Frequency Page: Shows topic frequency over time. Allows custom date ranges and topic comparisons."),
     html.Li("Sentiment Analysis Page: Displays sentiment trends for specific topics over time."),
