@@ -424,19 +424,19 @@ def update_topic_frequency_graph(selected_range, frequency_type, selected_years)
         (sentiment_data['created_utc'].dt.year <= selected_years[1])
     ]
 
-    # Ensure the index is a DatetimeIndex before converting to period
-    if not isinstance(filtered_data_years.index, pd.DatetimeIndex):
-        filtered_data_years['created_utc'] = pd.to_datetime(filtered_data_years['created_utc'])
-        filtered_data_years.set_index('created_utc', inplace=True)
+    # Group by quarter and Topic_Label
+    topic_freq_over_time = filtered_data_years.groupby(
+        [pd.Grouper(key='created_utc', freq='Q'), 'Topic_Label']
+    ).size().unstack(fill_value=0).reset_index()
 
-    # Create a 'Quarter' column from the 'created_utc' index
-    filtered_data_years['Quarter'] = filtered_data_years.index.to_period('Q')
-
-    # Aggregate data by Quarter and Topic_Label
-    topic_freq_over_time = filtered_data_years.groupby(['Quarter', 'Topic_Label']).size().unstack(fill_value=0)
+    # Format the date
+    topic_freq_over_time['created_utc'] = topic_freq_over_time['created_utc'].dt.strftime('%b %Y')
 
     # Normalize frequencies by quarter and multiply by 100 for percentage
-    topic_freq_over_time_normalized = topic_freq_over_time.div(topic_freq_over_time.sum(axis=1), axis=0) * 100
+    topic_freq_over_time_normalized = topic_freq_over_time.set_index('created_utc').div(
+        topic_freq_over_time.set_index('created_utc').sum(axis=1), axis=0
+    ) * 100
+    topic_freq_over_time_normalized.reset_index(inplace=True)
 
     # Function to extract topic number after removing "Topic " prefix
     def extract_topic_number(topic_label):
@@ -446,11 +446,7 @@ def update_topic_frequency_graph(selected_range, frequency_type, selected_years)
             return float('inf')
 
     # Sort the columns (topics) based on the extracted topic number
-    sorted_columns = sorted(topic_freq_over_time.columns, key=extract_topic_number)
-
-    # Reorder DataFrame columns according to the sorted topics
-    topic_freq_over_time = topic_freq_over_time[sorted_columns]
-    topic_freq_over_time_normalized = topic_freq_over_time_normalized[sorted_columns]
+    sorted_columns = sorted(topic_freq_over_time.columns[1:], key=extract_topic_number)
 
     # Initialize figure
     fig = go.Figure()
@@ -475,7 +471,7 @@ def update_topic_frequency_graph(selected_range, frequency_type, selected_years)
         wrapped_label = wrap_legend_label(topic_label)
         
         fig.add_trace(go.Scatter(
-            x=topic_freq_over_time.index.to_timestamp(),
+            x=topic_freq_over_time['created_utc'],
             y=topic_freq_over_time[topic_label],
             mode='lines+markers',
             name=wrapped_label,
@@ -485,7 +481,7 @@ def update_topic_frequency_graph(selected_range, frequency_type, selected_years)
         ))
 
         fig.add_trace(go.Scatter(
-            x=topic_freq_over_time_normalized.index.to_timestamp(),
+            x=topic_freq_over_time_normalized['created_utc'],
             y=topic_freq_over_time_normalized[topic_label],
             mode='lines+markers',
             name=wrapped_label,
@@ -516,7 +512,6 @@ def update_topic_frequency_graph(selected_range, frequency_type, selected_years)
         ),
         template="plotly_dark",
     )
-
 
     return fig
 
@@ -559,6 +554,9 @@ def update_sentiment_analysis_graph(selected_topic_label, frequency_type, select
         [pd.Grouper(key='created_utc', freq='Q'), 'Topic_Label', 'sentiment']
     ).size().unstack(fill_value=0).reset_index()
     
+    # Format the date to show quarters
+    sentiment_counts['created_utc'] = sentiment_counts['created_utc'].dt.strftime('%b %Y')
+    
     # Extract topic numbers for filtering
     sentiment_counts['Topic_Number'] = sentiment_counts['Topic_Label'].apply(
         lambda x: int(x.split(':')[0].replace('Topic ', '').strip())
@@ -567,8 +565,8 @@ def update_sentiment_analysis_graph(selected_topic_label, frequency_type, select
     # Filter for the selected topic and years
     filtered_sentiment_counts = sentiment_counts[
         (sentiment_counts['Topic_Label'] == selected_topic_label) &
-        (sentiment_counts['created_utc'].dt.year >= selected_years[0]) &
-        (sentiment_counts['created_utc'].dt.year <= selected_years[1])
+        (sentiment_counts['created_utc'].str[-4:].astype(int) >= selected_years[0]) &
+        (sentiment_counts['created_utc'].str[-4:].astype(int) <= selected_years[1])
     ].copy()
     
     # Get the actual Topic_Label for the selected topic (for title)
@@ -638,11 +636,17 @@ def update_sentiment_analysis_graph(selected_topic_label, frequency_type, select
     # Additional inputs like axis legends
     fig.update_layout(
         height=500,
-        xaxis_title='<b>Time</b>',
+        xaxis_title='<b>Time (Quarters)</b>',
         yaxis_title=yaxis_title,
         template="plotly_dark",
         margin=dict(t=30, b=55, l=0, r=0),
-        showlegend=False  # This line hides the legend
+        showlegend=False,  # This line hides the legend
+        xaxis=dict(
+            tickmode='array',
+            tickvals=filtered_sentiment_counts['created_utc'],
+            ticktext=filtered_sentiment_counts['created_utc'],
+            tickangle=45
+        )
     )
     
     # 1st output for Title, 2nd for Figure
