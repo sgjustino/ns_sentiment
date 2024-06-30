@@ -516,7 +516,8 @@ def update_topic_frequency_graph(selected_range, frequency_type, selected_years)
 
     # Additional inputs like axis legends
     fig.update_layout(
-        height=700,
+        height=500,
+        margin=dict(t=10),
         xaxis=dict(
             title="<b>Time</b>",
             automargin=True
@@ -653,7 +654,7 @@ def update_sentiment_analysis_graph(selected_topic_label, frequency_type, select
     
     # Additional inputs like axis legends
     fig.update_layout(
-        height=700,
+        height=500,
         xaxis_title='<b>Time</b>',
         yaxis_title=yaxis_title,
         template="plotly_dark",
