@@ -179,13 +179,13 @@ background_page = html.Div([
     html.H2("Navigating the Dashboard", className="title"),
     html.Hr(),
     dcc.Markdown('''
-    The dashboard, built with Dash (Plotly), includes:
+    The dashboard includes:
     '''),
     html.Li("Background Page: Introduces the study, guides dashboard navigation, and provides context on data sources and methods."),
     html.Li("Topic Frequency Page: Shows topic frequency over time. Allows custom date ranges and topic comparisons."),
     html.Li("Sentiment Analysis Page: Displays sentiment trends for specific topics over time."),
     html.Li("Topic Data Page: Table view of posts by topic and date range, with color-coded sentiment."),
-    html.Li(html.A("Github repository", href="https://github.com/sgjustino/ns_sentiment", target="_blank")),
+    html.Li(html.A("More info at Github repo", href="https://github.com/sgjustino/ns_sentiment", target="_blank")),
     html.Hr(),
 
     # Data Source and Modeling
@@ -193,20 +193,20 @@ background_page = html.Div([
     html.Hr(),
     dcc.Markdown('''
     ### Data Source
-    The analysis draws from the r/NationalServiceSG subreddit, covering discussions from November 2018 through December 2023. This data was sourced from academic torrents, collected via the open-source Pushshift project. 
+    The analysis draws from the r/NationalServiceSG subreddit, covering discussions from November 2018 through December 2023. This data was sourced from academic torrents, collected via the open-source Pushshift project.
 
     ### Methodology
 
-    1. **Data Refinement**
+    **1. Data Refinement**
     - Utilized NLTK library for text pre-processing
     - Conducted lemmatization and stemming techniques
     - Applied custom stopword filters to remove irrelevant content iteratively
 
-    2. **Thematic Analysis**
+    **2. Thematic Analysis**
     - Used BERTopic for topic modeling
     - Integrated GISTEmbed, a transformer model from Hugging Face, as the embedding framework
 
-    3. **Sentiment Evaluation**
+    **3. Sentiment Evaluation**
     - Deployed the Twitter-roBERTa-base model, fine-tuned on the TweetEval benchmark
     - Classified posts into positive, neutral, and negative sentiments
     ''')
