@@ -103,10 +103,6 @@ app.layout = html.Div([
             html.Div(
                 children=[
                     html.H2('How do the perspectives of National Servicemen, as expressed on Reddit, evolve over time?'),
-                    html.P(
-                        'Examining key themes and sentiment trends from r/NationalServiceSG posts (2018-2023) to understand the changing perspectives and emotional dynamics of NSFs.',
-                        style={'fontSize': '14px', 'color': '#efefef'}
-                    ),
                 ]
             )
         ]),
@@ -174,21 +170,11 @@ background_page = html.Div([
     html.H2("Background", className="title"),    
     html.Hr(),
     dcc.Markdown('''
-    National Service (NS) is a cornerstone of Singapore's social and defense framework. To understand public attitudes towards NS, traditional methods like surveys have been invaluable, helping us gain significant insights. However, these approaches often struggle to capture real-time, unfiltered opinions.
+    National Service (NS) is a cornerstone of Singapore's social and defense framework. While traditional methods like surveys and focus group discussions have been useful for understanding public attitudes towards NS, they have limitations. These methods often struggle to capture real-time, unfiltered opinions.
     In contrast, social media platforms, particularly Reddit, have emerged as rich sources of candid, unsolicited discussions about NS. These online exchanges frequently reveal nuanced perspectives and emerging issues that might not surface through conventional channels.
-    Recognizing the wealth of insights available in these online discussions, we aim to explore:
+    This dashboard leverages this rich online discourse by analyzing data from r/NationalServiceSG, a hub for NS-related discussions on Reddit. It examines how the perspectives of National Servicemen evolve over time, presenting key findings from topic modeling and sentiment analysis. The result is a dynamic window into primary NS themes and sentiment trends, offering a novel perspective on the NS experience.
     '''),
     html.Hr(),
-    # Explanation on how we will address the RQ
-    html.H2("How do the perspectives of National Servicemen, as expressed on Reddit, evolve over time?", className="title"), 
-    html.Hr(),
-    dcc.Markdown('''
-    To address this, we analyzed data from r/NationalServiceSG, a hub for open NS discussions on Reddit.
-    This dashboard presents key findings from our topic modeling and sentiment analysis, offering a window into the primary NS themes and sentiment trends over time. Users can interact with various components to delve into specific areas of interest, gaining deeper insights into the changing sentiments of NSFs on social media.
-    By leveraging this tool, stakeholders can gain a more comprehensive understanding of NS-related discussions, potentially informing policy decisions and improvements in the NS experience.
-    '''),
-    html.Hr(),
-
     # How to navigate the dashboard
     html.H2("Navigating the Dashboard", className="title"),
     html.Hr(),
@@ -207,7 +193,7 @@ background_page = html.Div([
     html.Hr(),
     dcc.Markdown('''
     ### Data Source
-    Our analysis draws from the r/NationalServiceSG subreddit, covering discussions from November 2018 through December 2023. This data was sourced from academic torrents, collected via the open-source Pushshift project. 
+    The analysis draws from the r/NationalServiceSG subreddit, covering discussions from November 2018 through December 2023. This data was sourced from academic torrents, collected via the open-source Pushshift project. 
 
     ### Methodology
 
